@@ -991,7 +991,8 @@ class Kglm(Model):
         # copied UNK (or padding).
         unks = target_tokens.eq(self._unk_index).view(-1, 1)
         copied = target_alias_indices.gt(0).view(-1, 1)
-        generate_mask = ~(unks & copied) & flattened_mask
+        #JRS
+        generate_mask = ~(unks & copied) & flattened_mask.bool()
         # Since we are in log-space we apply the mask by addition.
         generate_log_probs_extended_vocab = generate_log_probs_source_vocab + (generate_mask.float() + 1e-45).log()
 
@@ -1094,4 +1095,3 @@ class Kglm(Model):
         out['parent_ppl'] = self._parent_ppl.get_metric(reset)
         out['relation_ppl'] = self._relation_ppl.get_metric(reset)
         return out
-
