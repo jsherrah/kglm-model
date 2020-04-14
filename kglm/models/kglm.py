@@ -977,7 +977,7 @@ class Kglm(Model):
 
         # Flat sequences make life **much** easier.
         flattened_targets = target_tokens.view(batch_size * sequence_length, 1)
-        flattened_mask = mask.view(-1, 1).byte()
+        flattened_mask = mask.view(-1, 1).byte().bool()
 
         log_probs = self._vocab_logp(generate_scores, copy_scores, alias_indices)
 
@@ -992,7 +992,7 @@ class Kglm(Model):
         unks = target_tokens.eq(self._unk_index).view(-1, 1)
         copied = target_alias_indices.gt(0).view(-1, 1)
         #JRS
-        generate_mask = ~(unks & copied) & flattened_mask.bool()
+        generate_mask = ~(unks & copied) & flattened_mask
         # Since we are in log-space we apply the mask by addition.
         generate_log_probs_extended_vocab = generate_log_probs_source_vocab + (generate_mask.float() + 1e-45).log()
 
@@ -1001,7 +1001,7 @@ class Kglm(Model):
         # When computing the loss we need to get the log probability of **only** the copied tokens.
         alias_indices = alias_indices.view(batch_size * sequence_length, -1)
         target_alias_indices = target_alias_indices.view(-1, 1)
-        copy_mask = alias_indices.eq(target_alias_indices) & flattened_mask.bool() & target_alias_indices.gt(0)
+        copy_mask = alias_indices.eq(target_alias_indices) & flattened_mask & target_alias_indices.gt(0)
         copy_log_probs = copy_log_probs + (copy_mask.float() + 1e-45).log()
 
         # COMBINED LOSS ###
