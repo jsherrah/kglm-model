@@ -1001,7 +1001,7 @@ class Kglm(Model):
         # When computing the loss we need to get the log probability of **only** the copied tokens.
         alias_indices = alias_indices.view(batch_size * sequence_length, -1)
         target_alias_indices = target_alias_indices.view(-1, 1)
-        copy_mask = alias_indices.eq(target_alias_indices) & flattened_mask & target_alias_indices.gt(0)
+        copy_mask = alias_indices.eq(target_alias_indices) & flattened_mask.bool() & target_alias_indices.gt(0)
         copy_log_probs = copy_log_probs + (copy_mask.float() + 1e-45).log()
 
         # COMBINED LOSS ###
