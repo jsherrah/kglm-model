@@ -1042,8 +1042,8 @@ class Kglm(Model):
                                                            dim=1)
         combined_log_probs_extended_vocab[~flattened_mask] = 0
 
-        kg_mask = (mention_mask & mask.byte()).view(-1)
-        bg_mask = ((~mention_mask) & mask.byte()).view(-1)
+        kg_mask = (mention_mask & mask.bool()).view(-1)
+        bg_mask = ((~mention_mask) & mask.bool()).view(-1)
         mask = (kg_mask | bg_mask)
 
         self._ppl(-combined_log_probs_source_vocab[mask].sum(), mask.float().sum() + 1e-13)
